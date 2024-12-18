@@ -90,7 +90,6 @@ class _DrinkState extends State<Drink> {
               Padding(
                 padding: const EdgeInsets.only(left: 10.0, right: 8),
                 child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Text(
                       'Sugar: ${_currentValue.toInt()}',
@@ -225,7 +224,7 @@ class _DrinkState extends State<Drink> {
                       labelText: 'Temprature',
                       border: OutlineInputBorder(),
                     ),
-                    hint: const Text('Select Status'),
+                    hint: const Text('Select '),
                     items: _statuses.map((String status) {
                       return DropdownMenuItem<String>(
                         value: status,

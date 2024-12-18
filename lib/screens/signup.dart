@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_email_validator/email_validator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:prac22/screens/home.dart';
 import 'package:prac22/screens/signin.dart';
@@ -18,6 +19,11 @@ class _SigninState extends State<Signup> {
   bool isUpperCase = false;
   bool isLowerCase = false;
   bool isSpesialCharacter = false;
+
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
   onchangedPassword(String password) {
     setState(() {
       isUpperCase = false;
@@ -33,6 +39,16 @@ class _SigninState extends State<Signup> {
         isSpesialCharacter = true;
       }
     });
+  }
+
+  Future<void> saveData() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString('name', nameController.text);
+    await prefs.setString('email', emailController.text);
+    await prefs.setString('password', passwordController.text);
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Data saved successfully!")),
+    );
   }
 
   @override
@@ -57,8 +73,12 @@ class _SigninState extends State<Signup> {
                   const SizedBox(
                     height: 50,
                   ),
-                  const CustomTextField(hinttext: "name", obscureText: false),
                   CustomTextField(
+                      controller: nameController,
+                      hinttext: "Name",
+                      obscureText: false),
+                  CustomTextField(
+                      controller: emailController,
                       validator: (value) {
                         return value != null && !EmailValidator.validate(value)
                             ? "Enter a valid email"
@@ -71,6 +91,7 @@ class _SigninState extends State<Signup> {
                     height: 12,
                   ),
                   CustomTextField(
+                    controller: passwordController,
                     suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
@@ -88,7 +109,7 @@ class _SigninState extends State<Signup> {
                     onChanged: (password) {
                       onchangedPassword(password);
                     },
-                    hinttext: "password",
+                    hinttext: "Password",
                     obscureText: isVisiable ? true : false,
                   ),
                   Align(
@@ -109,11 +130,12 @@ class _SigninState extends State<Signup> {
                             ),
                           ))),
                   CustomButton(
-                    text: "Login",
-                    onPressed: () {
+                    text: "Register",
+                    onPressed: () async {
+                      await saveData();
                       Navigator.push(context, MaterialPageRoute(
                         builder: (context) {
-                          return const homepage();
+                          return const Signin();
                         },
                       ));
                     },

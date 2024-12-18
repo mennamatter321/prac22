@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_email_validator/email_validator.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:prac22/screens/home.dart';
-
 import 'package:prac22/screens/signup.dart';
 import 'package:prac22/widgets/custtombutton.dart';
 import 'package:prac22/widgets/textfield.dart';
@@ -16,24 +16,31 @@ class Signin extends StatefulWidget {
 
 class _SigninState extends State<Signin> {
   bool isVisiable = true;
-  bool isUpperCase = false;
-  bool isLowerCase = false;
-  bool isSpesialCharacter = false;
-  onchangedPassword(String password) {
-    setState(() {
-      isUpperCase = false;
-      isLowerCase = false;
-      isSpesialCharacter = false;
-      if (password.contains(RegExp(r'[A-Z]'))) {
-        isUpperCase = true;
-      }
-      if (password.contains(RegExp(r'[a-z]'))) {
-        isLowerCase = true;
-      }
-      if (password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'))) {
-        isSpesialCharacter = true;
-      }
-    });
+
+  final TextEditingController emailController = TextEditingController();
+  final TextEditingController passwordController = TextEditingController();
+
+  Future<void> signIn() async {
+    final SharedPreferences prefs = await SharedPreferences.getInstance();
+    final String? savedEmail = prefs.getString('email');
+    final String? savedPassword = prefs.getString('password');
+
+    if (savedEmail == emailController.text &&
+        savedPassword == passwordController.text) {
+      // إذا كانت البيانات المدخلة صحيحة
+      Navigator.push(context, MaterialPageRoute(
+        builder: (context) {
+          return const homepage();
+        },
+      ));
+    } else {
+      // إذا كانت البيانات المدخلة غير صحيحة
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Invalid email or password!"),
+        ),
+      );
+    }
   }
 
   @override
@@ -59,6 +66,7 @@ class _SigninState extends State<Signin> {
                     height: 50,
                   ),
                   CustomTextField(
+                      controller: emailController,
                       validator: (value) {
                         return value != null && !EmailValidator.validate(value)
                             ? "Enter a valid email"
@@ -71,6 +79,7 @@ class _SigninState extends State<Signin> {
                     height: 12,
                   ),
                   CustomTextField(
+                    controller: passwordController,
                     suffixIcon: IconButton(
                         onPressed: () {
                           setState(() {
@@ -85,20 +94,14 @@ class _SigninState extends State<Signin> {
                           ? "Enter at least 6 characters"
                           : null;
                     },
-                    onChanged: (password) {
-                      onchangedPassword(password);
-                    },
-                    hinttext: "password",
+                    hinttext: "Password",
                     obscureText: isVisiable ? true : false,
                   ),
                   Align(
                       alignment: Alignment.topRight,
                       child: TextButton(
                           onPressed: () {
-                            // Navigator.pushReplacement(
-                            //     context,
-                            //     MaterialPageRoute(
-                            //         builder: (context) => const Forgetpassword()));
+                            // يمكن إضافة منطق لاسترجاع كلمة المرور هنا
                           },
                           child: const Text(
                             "Forgot Password?",
@@ -110,12 +113,8 @@ class _SigninState extends State<Signin> {
                           ))),
                   CustomButton(
                     text: "Sign in",
-                    onPressed: () {
-                      Navigator.push(context, MaterialPageRoute(
-                        builder: (context) {
-                          return const homepage();
-                        },
-                      ));
+                    onPressed: () async {
+                      await signIn();
                     },
                   ),
                   Padding(
@@ -126,7 +125,7 @@ class _SigninState extends State<Signin> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           const Text(
-                            "Dont have an account",
+                            "Don't have an account?",
                             style: TextStyle(
                               fontWeight: FontWeight.w500,
                               fontSize: 20,
